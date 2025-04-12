@@ -1,19 +1,25 @@
 using Application.Core;
 using Application.DTOs;
 using Application.Mappers;
+using Domain.Interfaces;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 
 namespace Application.Queries.Products;
 
-public class GetProductListHandler(StoreContext context) : IRequestHandler<GetProductListQuery, Result<List<ProductDto>>>
+public class GetProductListHandler : IRequestHandler<GetProductListQuery, Result<List<ProductDto>>>
 {
-    private readonly StoreContext _context = context;
+    private readonly IProductRepository _repository;
+
+    public GetProductListHandler(IProductRepository repository)
+    {
+        _repository = repository;
+    }
 
     public async Task<Result<List<ProductDto>>> Handle(GetProductListQuery request, CancellationToken cancellationToken)
     {
-        var products = await _context.Products.ToListAsync(cancellationToken);
+        var products = await _repository.GetAllProductsAsync(cancellationToken);
 
         var productsDto = products.Select(ProductMapper.MapToDto).ToList();
 

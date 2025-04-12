@@ -7,9 +7,14 @@ using MediatR;
 
 namespace Application.Queries.Products;
 
-public class GetProductDetailsHandler(IProductRepository repository) : IRequestHandler<GetProductDetailsQuery, Result<ProductDto>>
+public class GetProductDetailsHandler: IRequestHandler<GetProductDetailsQuery, Result<ProductDto>>
 {
-    private readonly IProductRepository _repository = repository;
+    private readonly IProductRepository _repository;
+
+    public GetProductDetailsHandler(IProductRepository repository)
+    {
+        _repository = repository;
+    }
 
     public async Task<Result<ProductDto>> Handle(GetProductDetailsQuery request, CancellationToken cancellationToken)
     {

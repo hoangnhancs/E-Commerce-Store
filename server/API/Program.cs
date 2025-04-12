@@ -17,7 +17,7 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<GetProductDetailsHandler>());
-
+builder.Services.AddCors();
 
 var app = builder.Build();
 
@@ -32,6 +32,15 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseCors(options =>
+{
+    options
+        .AllowAnyOrigin()
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .WithOrigins("https://localhost:3000");
+});
 
 using var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;
