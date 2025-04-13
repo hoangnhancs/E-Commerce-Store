@@ -1,13 +1,10 @@
-import { useEffect, useState } from "react"
-import { Product } from "./lib/types"
+import { useState } from "react"
 import { Box, Container, createTheme, CssBaseline, ThemeProvider } from "@mui/material"
 import NavBar from "./layouts/NavBar"
-import ProductCatalog from "./features/products/ProductCatalog"
-
+import { Outlet } from "react-router-dom"
 
 function App() {
-  
-  const [products, setProducts] = useState<Product[]>([])
+
   const [darkMode, setDarkMode] = useState(false);
 
   function handleThemeChange() {
@@ -20,40 +17,67 @@ function App() {
     palette: {
       mode: palletteType,
       background: {
-        default: (palletteType === 'dark') ? '#121212' : '#eaeaea',
+        default: palletteType === 'dark' 
+          ? '#121212' 
+          : '#f5f5f5',
+        paper: palletteType === 'dark' 
+          ? '#1e1e1e' 
+          : '#ffffff'
+      },
+      primary: {
+        main: palletteType === 'dark' 
+          ? '#90caf9' 
+          : '#1976d2',
+        light: palletteType === 'dark' 
+          ? '#e3f2fd' 
+          : '#42a5f5',
+        dark: palletteType === 'dark' 
+          ? '#42a5f5' 
+          : '#1565c0'
+      },
+      secondary: {
+        main: palletteType === 'dark' 
+          ? '#ce93d8' 
+          : '#9c27b0',
+        light: palletteType === 'dark' 
+          ? '#f3e5f5' 
+          : '#ba68c8',
+        dark: palletteType === 'dark' 
+          ? '#ab47bc' 
+          : '#7b1fa2'
+      },
+      text: {
+        primary: palletteType === 'dark' 
+          ? '#ffffff' 
+          : '#000000',
+        secondary: palletteType === 'dark' 
+          ? '#b0b0b0' 
+          : '#666666'
       }
     }
   })
-
-
-  useEffect(() => {
-    fetch('https://localhost:5001/api/products')
-      .then(res => res.json())
-      .then(data => {
-        setProducts(data)
-      })
-      .catch(err => console.log(err))
-  }, [])
 
   return (
     <>
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <NavBar darkMode={darkMode} changeTheme={handleThemeChange}/>
-        11111
-        
         <Box
           sx={{
             background: darkMode 
-              ? 'radial-gradient(circle, #1e3aBa, #111B27)' 
-              : 'radial-gradient(circle, #baecf9, #f0f9ff)',
+              ? 'linear-gradient(to bottom, #1a237e 0%, #121212 100%)' 
+              : 'linear-gradient(to bottom, #bbdefb 0%, #f5f5f5 100%)',
             minHeight: '100vh',
-            py: 6,
+            
+            display: 'flex',
+            flexDirection: 'column',
+            mt: 8,
+            gap: 3,
           }}
         >
-          <Container maxWidth="xl" sx={{ mt: 10 }}>
-            <ProductCatalog products={products}/>
-          </Container>
+          <Container maxWidth="xl" sx={{ mt: 6 }}>
+            <Outlet />
+          </Container> 
         </Box>
       </ThemeProvider> 
     </>    
