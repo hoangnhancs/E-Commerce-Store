@@ -71,11 +71,13 @@ function App() {
             
             display: 'flex',
             flexDirection: 'column',
-            mt: 8,
-            gap: 3,
+            
+            
           }}
         >
-          <Container maxWidth="xl" sx={{ mt: 6 }}>
+          <Container maxWidth="xl" sx={{ 
+            mt: 12  // marginTop responsive
+          }}>
             <Outlet />
           </Container> 
         </Box>

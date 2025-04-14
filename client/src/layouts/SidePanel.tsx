@@ -38,6 +38,10 @@ const bannerItems = [
         image: "/images/banner3.jpg",
         title: "Hot deals weekend"
     },
+    {
+        image: "/images/banner3.jpg",
+        title: "Hot deals weekend"
+    },
     // ...thêm các banner khác
 ];
 
@@ -122,7 +126,7 @@ export default function SidePanel() {
                     height: '100%',
                     overflow: 'hidden',
                     borderRadius: 5,
-                    position: 'relative',
+                    
                     '& .swiper-button-next, & .swiper-button-prev': {
                         color: 'white',
                         background: 'rgba(0,0,0,0.5)',
@@ -170,7 +174,7 @@ export default function SidePanel() {
                     navigation={true}  // Make sure this is explicitly set to true
                     pagination={{
                         clickable: true,
-                        type: 'bullets'
+                        type: 'bullets',
                     }}
                     autoplay={{
                         delay: 4000,
