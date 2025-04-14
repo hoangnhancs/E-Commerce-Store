@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
-import { Product } from "../../lib/types";
 import { useParams } from "react-router-dom";
 import { Box, Button, Divider, Grid, Table, TableBody, TableCell, TableContainer, TableRow, TextField, Typography } from "@mui/material";
+import { useFetchProductByIdQuery } from "./productApi";
 // import { styled } from '@mui/material/styles';
 
 
@@ -20,7 +19,9 @@ interface ColorOptions {
 
 export default function ProductDetails() {
   const { id } = useParams();
-  const [product, setProduct] = useState<Product | null>(null);
+
+  const {data: product, isLoading: isLoading} = useFetchProductByIdQuery(id ?? '')
+
   const dungluong: StorageOptions = {
   '1TB': 1000,
   '2TB': 2000,
@@ -38,15 +39,8 @@ export default function ProductDetails() {
   };
 
   const isSelected = true; // This should be set based on your logic
-
-  useEffect(() => {
-    fetch(`https://localhost:5001/api/products/${id}`)
-      .then(res => res.json())
-      .then(data => setProduct(data))
-      .catch(err => console.error(err));
-  }, [id]);
   
-  if (!product) {
+  if (isLoading || !product) {
     return <Typography>No product found</Typography>;
   }
 

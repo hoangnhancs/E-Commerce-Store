@@ -1,27 +1,28 @@
-import { Box, Grid } from "@mui/material"
-import { Product } from "../../lib/types"
+import { Box, Grid, Typography } from "@mui/material"
 import ProductCard from "./ProductCard"
+import { useFetchProductsQuery } from "./productApi"
 
-type Props = {
-    products: Product[]
-}
 
-export default function ProductList({products}: Props) {
-  return (
-    <Box
-       sx={{ flexGrow: 1, mt:10}} 
-    >
-        <Grid container spacing={{ xs: 2, sm: 3, md: 4 }} columns={{ xs: 2, sm: 9, md: 12 }}>
-            {products.map((product) => (
-                <Grid 
-                    size={{ xs: 1, sm: 3, md: 3 }} 
-                    key={product.id}
-                >
-                    <ProductCard product={product} />
-                </Grid>
-            ))}
-        </Grid>
-    </Box>
+
+export default function ProductList() {
+    const {data, isLoading} = useFetchProductsQuery()
     
+    if (isLoading || !data) return <Typography>Loading...</Typography>
+    
+    return (
+        <Box
+            sx={{ flexGrow: 1, mt:6}} 
+        >
+            <Grid container spacing={{ xs: 2, sm: 3, md: 4 }} columns={{ xs: 2, sm: 9, md: 12 }}>
+                {data.map((product) => (
+                    <Grid 
+                        size={{ xs: 1, sm: 3, md: 3 }} 
+                        key={product.id}
+                    >
+                        <ProductCard product={product} />
+                    </Grid>
+                ))}
+            </Grid>
+        </Box>  
   )
 }
