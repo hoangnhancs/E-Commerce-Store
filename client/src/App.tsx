@@ -1,17 +1,14 @@
-import { useState } from "react"
+
 import { Box, Container, createTheme, CssBaseline, ThemeProvider } from "@mui/material"
 import NavBar from "./layouts/NavBar"
 import { Outlet } from "react-router-dom"
+import { useAppSelector } from "./hooks"
 
 function App() {
 
-  const [darkMode, setDarkMode] = useState(false);
-
-  function handleThemeChange() {
-    setDarkMode(!darkMode);
-  }
+  const isDarkMode = useAppSelector(state => state.ui.isDarkMode)
   
-  const palletteType = darkMode ? 'dark' : 'light'
+  const palletteType = isDarkMode ? 'dark' : 'light'
   
   const theme = createTheme({
     palette: {
@@ -61,10 +58,10 @@ function App() {
     <>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <NavBar darkMode={darkMode} changeTheme={handleThemeChange}/>
+        <NavBar />
         <Box
           sx={{
-            background: darkMode 
+            background: isDarkMode 
               ? 'linear-gradient(to bottom, #1a237e 0%, #121212 100%)' 
               : 'linear-gradient(to bottom, #bbdefb 0%, #f5f5f5 100%)',
             minHeight: '100vh',

@@ -41,7 +41,7 @@ export default function ProductDetails() {
   const isSelected = true; // This should be set based on your logic
   
   if (isLoading || !product) {
-    return <Typography>No product found</Typography>;
+    return <Typography>Loading...</Typography>;
   }
 
   const productDetails = [

@@ -1,10 +1,15 @@
 import { StoreMallDirectory, DarkMode, LightMode, ShoppingCart } from "@mui/icons-material";
-import { AppBar, Badge, Box, Container, Divider, IconButton, List, Toolbar, Typography } from "@mui/material";
+import { AppBar, Badge, Box, CircularProgress, Container, Divider, IconButton, LinearProgress, List, Toolbar, Typography } from "@mui/material";
 import MenuItemLink from "../components/MenuItemLink";
 import { NavLink } from "react-router-dom";
 import { Menu, Close } from "@mui/icons-material";
 import { useMediaQuery, useTheme, Drawer } from "@mui/material";
 import { useState } from "react";
+import { useAppDispatch, useAppSelector } from "../hooks";
+import { toggleDarkMode } from "./uiSlice";
+
+
+
 
 const midLinks = [
     {title: 'products', path: '/products'},
@@ -16,15 +21,12 @@ const midLinks = [
 const rightLinks = [
     {title: 'login', path: '/login'},
     {title: 'register', path: '/register'},
-
 ]
 
-type Props = {
-    darkMode: boolean,
-    changeTheme: () => void 
-}
+export default function NavBar() {
 
-export default function NavBar({changeTheme, darkMode}: Props) {
+  const {isLoading, isDarkMode} = useAppSelector(state => state.ui)
+  const dispatch = useAppDispatch()
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -64,6 +66,7 @@ export default function NavBar({changeTheme, darkMode}: Props) {
   );
 
   return (
+    
     <AppBar position="fixed" >
       <Container maxWidth='xl'>
         <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', height: '80px !important' }}>
@@ -83,6 +86,11 @@ export default function NavBar({changeTheme, darkMode}: Props) {
             >
               RE-STORE
             </Typography>
+            <Box>
+              {isLoading && (
+              <CircularProgress />
+            )}
+            </Box>
           </Box>
 
           {/* Desktop Menu */}
@@ -97,8 +105,8 @@ export default function NavBar({changeTheme, darkMode}: Props) {
               </List>
 
               <Box display="flex" alignItems="center">
-                <IconButton onClick={changeTheme}>
-                  {!darkMode ? <LightMode sx={{color: 'yellow'}} /> : <DarkMode />}
+                <IconButton onClick={() => dispatch(toggleDarkMode())}>
+                  {!isDarkMode ? <LightMode sx={{color: 'yellow'}} /> : <DarkMode />}
                 </IconButton>
                 <IconButton color="inherit">
                   <Badge badgeContent={4} color="secondary">
@@ -119,8 +127,8 @@ export default function NavBar({changeTheme, darkMode}: Props) {
           {/* Mobile Menu Button */}
           {isMobile && (
             <Box display="flex" alignItems="center">
-              <IconButton onClick={changeTheme} sx={{ mr: 1 }}>
-                {!darkMode ? <LightMode sx={{color: 'yellow'}} /> : <DarkMode />}
+              <IconButton onClick={() => dispatch(toggleDarkMode())} sx={{ mr: 1 }}>
+                {!isDarkMode ? <LightMode sx={{color: 'yellow'}} /> : <DarkMode />}
               </IconButton>
               <IconButton color="inherit" sx={{ mr: 1 }}>
                 <Badge badgeContent={4} color="secondary">
@@ -135,7 +143,7 @@ export default function NavBar({changeTheme, darkMode}: Props) {
               </IconButton>
             </Box>
           )}
-        </Toolbar>
+        </Toolbar>      
       </Container>
 
       {/* Mobile Drawer */}
@@ -150,6 +158,11 @@ export default function NavBar({changeTheme, darkMode}: Props) {
       >
         {mobileMenu}
       </Drawer>
+      {isLoading && (
+        <Box sx={{width: '100%'}}>
+          <LinearProgress color="secondary" />
+        </Box>
+      )}
     </AppBar>
   );
 }
