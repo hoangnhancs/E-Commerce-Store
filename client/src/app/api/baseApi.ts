@@ -1,28 +1,66 @@
-import { BaseQueryApi, FetchArgs, fetchBaseQuery } from "@reduxjs/toolkit/query";
+import {
+  BaseQueryApi,
+  FetchArgs,
+  fetchBaseQuery,
+} from "@reduxjs/toolkit/query";
 import { startLoading, stopLoading } from "../../layouts/uiSlice";
+import { toast } from "react-toastify";
+import { router } from "../../router/Routes";
 
+type CustomError = | string | {message: string} | {errors: string [], title: string}
 
 const customBaseQuery = fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_URL,
-})
+  baseUrl: import.meta.env.VITE_API_URL,
+});
 
-const sleep = () => new Promise(resolve => setTimeout(resolve, 500))
+const sleep = () => new Promise((resolve) => setTimeout(resolve, 500));
 
-export const baseQueryWithErrorHandling = async (args: string | FetchArgs, api: BaseQueryApi, extraOptions: object) => {
-    api.dispatch(startLoading())//start loading
+export const baseQueryWithErrorHandling = async (
+  args: string | FetchArgs,
+  api: BaseQueryApi,
+  extraOptions: object
+) => {
+  api.dispatch(startLoading()); //start loading
 
-    await sleep()
-    const result = await customBaseQuery(args, api, extraOptions)
+  await sleep();
+  const result = await customBaseQuery(args, api, extraOptions);
+
+  api.dispatch(stopLoading()); //stop loading
+  if (result.error) {
     
-    api.dispatch(stopLoading())//stop loading
-    if (result.error) {
-        const {status, data} = result.error
-        //handle error
-        console.log(status, data)
-    }
+    const originalStatus = result.error.status === 'PARSING_ERROR' && result.error.originalStatus 
+        ? result.error.originalStatus 
+        : result.error.status;
+    const responseData = result.error.data as CustomError
+    //handle error
+    console.log(result.error);
+    console.log(originalStatus, responseData);
+    switch (originalStatus) {
+        case 400:
+            if (typeof responseData === "string")
+                toast.error(responseData || "Bad request c");
+            else if ('errors' in responseData) {
+                toast.error(responseData.title)
+                throw Object.values(responseData.errors).flat().join(', ')       
+            }
+            break
+        case 401:
+            toast.error((responseData as string) || "Unauthorized c");
+            break
+        case 404:
+            toast.error((responseData as string) || "Not found c");
+            router.navigate('/not-found')
+            break
+        case 500:
+            if (typeof responseData !== "string" && 'message' in responseData)
+                toast.error((responseData.message ) || "Server error c");
+                router.navigate('/server-error', {state: {error: responseData}})
+            break
+        }
+  }
 
-    return result
-}
+  return result;
+};
 
 // Tham số:
 // args: Là tham số bạn gửi đi để xác định endpoint và các parameters cho query. Có thể là URL (string) hoặc là một object kiểu FetchArgs.

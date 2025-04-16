@@ -1,5 +1,8 @@
+using API.Middleware;
 using Application.Queries.Products;
+using Domain.Entities;
 using Domain.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 using Persistence.Repositories;
@@ -11,13 +14,22 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddDbContext<StoreContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddTransient<ExceptionMiddleware>();
 
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<GetProductDetailsHandler>());
 builder.Services.AddCors();
+
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IBasketRepository, BasketRepository>();
+builder.Services.AddIdentityApiEndpoints<User>(opt =>
+{
+    opt.User.RequireUniqueEmail = true;
+})
+ .AddRoles<IdentityRole>()
+ .AddEntityFrameworkStores<StoreContext>();
 
 var app = builder.Build();
 
@@ -31,7 +43,7 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
-app.MapControllers();
+app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseCors(options =>
 {
@@ -41,6 +53,10 @@ app.UseCors(options =>
         .AllowAnyHeader()
         .WithOrigins("https://localhost:3000");
 });
+
+app.MapControllers();
+
+
 
 using var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;

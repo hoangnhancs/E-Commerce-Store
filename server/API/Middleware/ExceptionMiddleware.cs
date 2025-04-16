@@ -34,6 +34,14 @@ public class ExceptionMiddleware(ILogger<ExceptionMiddleware> logger, IHostEnvir
         ? new AddException(context.Response.StatusCode, ex.Message, ex.StackTrace)
         : new AddException(context.Response.StatusCode, ex.Message, null);
 
+        // var response = new ProblemDetails
+        // {
+        //     Status = context.Response.StatusCode,
+            
+        //     Title = ex.Message,
+        //     Detail = env.IsDevelopment() ? ex.StackTrace?.ToString() : null,
+        // };
+
         var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
         var json = JsonSerializer.Serialize(response, options);
 
