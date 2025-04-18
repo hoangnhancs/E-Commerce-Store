@@ -1,11 +1,40 @@
 using System;
 using Domain.Entities;
+using Microsoft.AspNetCore.Identity;
 namespace Persistence;
 
 public class DbInitializer
 {
-    public static async Task SeedData(StoreContext context)
+    public static async Task SeedData(StoreContext context, UserManager<User> userManager)
     {
+
+        if (!userManager.Users.Any())
+        {
+            var user = new User
+            {
+                DisplayName = "Bob",
+                UserName = "bob@gmail.com",
+                Email = "bob@gmail.com"
+            };
+
+            await userManager.CreateAsync(user, "Pa$$w0rd");
+            await userManager.AddToRoleAsync(user, "Member");
+            var bobBasket = new Basket { UserId = user.Id };
+            context.Baskets.Add(bobBasket);
+
+            var admin = new User
+            {
+                DisplayName = "Admin",
+                UserName = "admin@gmail.com",
+                Email = "admin@gmail.com"
+            };
+
+            await userManager.CreateAsync(admin, "Pa$$w0rd");
+            await userManager.AddToRolesAsync(admin, ["Member", "Admin"]);
+            var adminBasket = new Basket { UserId = admin.Id };
+            context.Baskets.Add(adminBasket);
+
+        }
 
         if (context.Products.Any()) return;
 

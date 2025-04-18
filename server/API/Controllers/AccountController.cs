@@ -1,4 +1,5 @@
 using System;
+using Application.Command.Baskets;
 using Application.DTOs;
 using Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
@@ -17,7 +18,7 @@ public class AccountController(SignInManager<User> signInManager) : BaseApiContr
         {
             UserName = registerDto.Email,
             Email = registerDto.Email,
-            DisplayName = registerDto.DisplayName
+            DisplayName = registerDto.DisplayName,
         };
 
         var result = await signInManager.UserManager.CreateAsync(user, registerDto.Password);
@@ -29,10 +30,19 @@ public class AccountController(SignInManager<User> signInManager) : BaseApiContr
             {
                 ModelState.AddModelError("error", error.Description);
             }
-            return BadRequest(ModelState); // lỗi tạo user, ví dụ password yếu
+            return BadRequest(ModelState); // lỗi tạo user
         }
 
-        return Ok("Create user successfully");
+        await Mediator.Send(new CreateBasketCommand { UserId = user.Id });
+        await signInManager.UserManager.AddToRoleAsync(user, "Member");
+
+        return Ok(new
+        {
+            user.UserName,
+            user.Email,
+            user.DisplayName,
+            user.Id
+        }); ;
     }
 
     [AllowAnonymous]
@@ -45,12 +55,15 @@ public class AccountController(SignInManager<User> signInManager) : BaseApiContr
 
         if (user == null) return Unauthorized();
 
+        var roles = await signInManager.UserManager.GetRolesAsync(user);
+
         return Ok(new
         {
             user.DisplayName,
             user.Email,
             user.Id,
             user.ImageUrl,
+            roles,
             // user.Photos,
         });
     }
@@ -74,8 +87,26 @@ public class AccountController(SignInManager<User> signInManager) : BaseApiContr
         var result = await signInManager.UserManager
             .ChangePasswordAsync(user, passwordDto.CurrentPassword, passwordDto.NewPassword);
 
-        if (result.Succeeded) return Ok();
+        if (result.Succeeded) return Ok("Change password successfully for user " + user.UserName);
 
         return BadRequest(result.Errors.First().Description);
+    }
+
+    [AllowAnonymous]
+    [HttpPost("login")]
+    public async Task<ActionResult> Login(LoginDto loginDto)
+    {
+        var result = await signInManager.PasswordSignInAsync(
+            loginDto.Email,
+            loginDto.Password,
+            isPersistent: false,  // Set to true if you want "remember me" functionality
+            lockoutOnFailure: false);  // Set to true to enable account lockout on failed attempts
+
+        if (!result.Succeeded) return Unauthorized();
+
+        var user = await signInManager.UserManager.FindByEmailAsync(loginDto.Email);
+
+        if (user == null) return Unauthorized();
+        return Ok("Login successfully");
     }
 }

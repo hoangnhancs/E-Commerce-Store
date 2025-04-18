@@ -16,8 +16,17 @@ public class BasketRepository(StoreContext context) : IBasketRepository
         if (basket == null)
         {
             basket = new Basket { UserId = userId };
-            basket.AddItem(product, quantity);
+            _context.Baskets.Add(basket);
         }
+
+        basket.AddItem(product, quantity);
+    }
+
+    public Task CreateBasketAsync(string userId, CancellationToken cancellationToken)
+    {
+        var basket = new Basket { UserId = userId };
+        _context.Baskets.Add(basket);
+        return Task.CompletedTask;
     }
 
     public async Task<Basket?> GetBasketByUserIdAsync(string userId, CancellationToken cancellationToken)
@@ -26,6 +35,13 @@ public class BasketRepository(StoreContext context) : IBasketRepository
             .Include(x => x.Items)
             .ThenInclude(x => x.Product)
             .FirstOrDefaultAsync(b => b.UserId == userId, cancellationToken);
+    }
+
+    public async Task RemoveItemFromBasketAsync(string userId, string productId, int quantity, CancellationToken cancellationToken)
+    {
+        var basket = await GetBasketByUserIdAsync(userId, cancellationToken);
+        if (basket == null) return;
+        basket.RemoveItem(productId, quantity);
     }
 
     public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken)

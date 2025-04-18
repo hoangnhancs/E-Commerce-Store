@@ -1,37 +1,33 @@
 using System;
 using Application.Core;
-
 using Domain.Interfaces;
 using MediatR;
-using Persistence.Repositories;
 
 namespace Application.Command.Baskets;
 
-public class AddItemToBasketHandler : IRequestHandler<AddItemToBasketCommand, Result<Unit>>
+public class RemoveItemFromBasketHandler : IRequestHandler<RemoveItemFromBasketCommand, Result<Unit>>
 {
-
     private readonly IBasketRepository _basketRepository;
     private readonly IProductRepository _productRepository;
-
-    public AddItemToBasketHandler(IBasketRepository basketRepository, IProductRepository productRepository)
+    public RemoveItemFromBasketHandler(IBasketRepository basketRepository, IProductRepository productRepository)
     {
-        _productRepository = productRepository;
         _basketRepository = basketRepository;
+        _productRepository = productRepository;
     }
 
-
-    public async Task<Result<Unit>> Handle(AddItemToBasketCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Unit>> Handle(RemoveItemFromBasketCommand request, CancellationToken cancellationToken)
     {
+
         if (string.IsNullOrEmpty(request.UserId))
         {
             return Result<Unit>.Failure("User ID cannot be null or empty", 400);
         }
-        
+
         var product = await _productRepository.GetProductByIdAsync(request.ProductId, cancellationToken);
 
         if (product == null) return Result<Unit>.Failure("Product not found", 404);
 
-        await _basketRepository.AddItemToBasketAsync(request.UserId, product, request.Quantity, cancellationToken);
+        await _basketRepository.RemoveItemFromBasketAsync(request.UserId, request.ProductId, request.Quantity, cancellationToken);
 
         var result = await _basketRepository.SaveChangesAsync(cancellationToken);
 
@@ -40,5 +36,3 @@ public class AddItemToBasketHandler : IRequestHandler<AddItemToBasketCommand, Re
         return Result<Unit>.Success(Unit.Value);
     }
 }
-
-    

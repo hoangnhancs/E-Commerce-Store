@@ -15,7 +15,7 @@ namespace API.Controllers
 
         protected ActionResult HandleResult<T>(Result<T> result)
         {
-            if (!result.IsSuccess && result.Code == 404) return NotFound(); // Trả về lỗi 404 nếu activity không tồn tại
+            if (!result.IsSuccess && result.Code == 404) return NotFound(result.Error); // Trả về lỗi 404 nếu activity không tồn tại
             if (result.IsSuccess && result.Value != null) return Ok(result.Value);
             return BadRequest(result.Error);
         }

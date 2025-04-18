@@ -20,7 +20,7 @@ builder.Services.AddControllers(opt =>
 });
 
 builder.Services.AddDbContext<StoreContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddTransient<ExceptionMiddleware>();
 
 
@@ -31,6 +31,9 @@ builder.Services.AddCors();
 
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();
+// Trong Program.cs
+// builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddIdentityApiEndpoints<User>(opt =>
 {
@@ -38,7 +41,6 @@ builder.Services.AddIdentityApiEndpoints<User>(opt =>
 })
  .AddRoles<IdentityRole>()
  .AddEntityFrameworkStores<StoreContext>();
-
 
 var app = builder.Build();
 
@@ -50,6 +52,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseMiddleware<ExceptionMiddleware>();
@@ -65,7 +68,7 @@ app.UseCors(options =>
 
 app.MapControllers();
 
-
+app.MapGroup("api").MapIdentityApi<User>(); //chuyen tu api/account thanh api
 
 using var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;
@@ -75,10 +78,10 @@ try
     var context = services.GetRequiredService<StoreContext>();
     //o dong nay, context đã có sẵn dữ liệu từ database, vì nó được lấy từ DI container,
     // và Entity Framework Core sẽ tự động kết nối với database mà bạn đã cấu hình.
-    
+    var userManager = services.GetRequiredService<UserManager<User>>();
     await context.Database.MigrateAsync();
     //chi kiem tra schema, k kiem tra data
-    await DbInitializer.SeedData(context);
+    await DbInitializer.SeedData(context, userManager);
     //thuc hien seed data trong \Persistence\DbInitializer.cs
     //data se duoc add vao db o line nay
 }

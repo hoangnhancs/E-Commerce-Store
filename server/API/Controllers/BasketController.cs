@@ -1,36 +1,66 @@
 using System;
+using System.Security.Claims;
 using Application.Command.Baskets;
+using Application.DTOs;
 using Application.Queries.Baskets;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Persistence;
 
 namespace API.Controllers;
 
+[Authorize]
 public class BasketController() : BaseApiController
 {
-    [HttpGet]
+    [HttpGet("mybasket")]
     public async Task<IActionResult> GetBasket()
     {
-        var userId = Request.Cookies["userId"];
+        var userId =  User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (string.IsNullOrEmpty(userId))
-            return BadRequest("User ID not found in cookies");
+            return Unauthorized("User not authenticated");
         
         return HandleResult(await Mediator.Send(new GetBasketQuery {UserId = userId}));
     }
 
-    [HttpPost]
-    public async Task<IActionResult> AddItemToBasket(AddItemToBasketCommand command)
+    [HttpPost("mybasket/items")]
+    public async Task<IActionResult> AddItemToBasket(AddItemDto addItemDto)
     {
 
-        var userId = Request.Cookies["userId"];
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (string.IsNullOrEmpty(userId)) 
         {
-            return Unauthorized();
+            return Unauthorized("User not authenticated");
         }
 
-        command.UserId = userId;
+        var command = new AddItemToBasketCommand
+        {
+            UserId = userId,
+            ProductId = addItemDto.ProductId,
+            Quantity = addItemDto.Quantity
+        };
+
+        return HandleResult(await Mediator.Send(command));
+    }
+
+    [HttpDelete("mybasket/items/{productId}")]
+    public async Task<IActionResult> RemoveItemFromBsket(string productId, [FromQuery]int quantity = 1)
+    {
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(userId)) 
+        {
+            return Unauthorized("User not authenticated");
+        }
+
+        var command = new RemoveItemFromBasketCommand
+        {
+            UserId = userId,
+            ProductId = productId,
+            Quantity = quantity
+        };
 
         return HandleResult(await Mediator.Send(command));
     }
