@@ -16,10 +16,9 @@ export default function ProductCard({product}: Props) {
     const {data} = useGetCurrentUserQuery();
 
     const handleAddToCart = () => {
-        if (!data?.Id) {
-            setOpenLoginPrompt(true); // Hiển thị hộp thoại yêu cầu đăng nhập
+        if (!data?.id) {
+            setOpenLoginPrompt(true); 
         }
-        // Thực hiện thêm sản phẩm vào giỏ hàng ở đây
     }
 
   return (

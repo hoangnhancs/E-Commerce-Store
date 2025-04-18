@@ -11,6 +11,7 @@ type CustomError = | string | {message: string} | {errors: string [], title: str
 
 const customBaseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_URL,
+  credentials: "include",
 });
 
 const sleep = () => new Promise((resolve) => setTimeout(resolve, 500));

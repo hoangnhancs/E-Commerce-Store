@@ -10,6 +10,7 @@ import Error from "../features/error/Error";
 import ServerError from "../features/error/ServerError";
 import NotFound from "../features/error/NotFound";
 import BasketPage from "../features/basket/BasketPage";
+import LoginForm from "../features/user/LoginForm";
 
 export const router = createBrowserRouter([
     {
@@ -23,6 +24,7 @@ export const router = createBrowserRouter([
             {path: '/contact', element: <ContactPage />},
             {path: '/basket', element: <BasketPage />},
             {path: '/counter', element: <Counter />},
+            {path: '/login', element: <LoginForm />},
             {path: '/error', element: <Error />},
             {path: '/server-error', element: <ServerError />},
             {path: '/not-found', element: <NotFound />},

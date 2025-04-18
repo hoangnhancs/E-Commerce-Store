@@ -28,10 +28,10 @@ export type Item = {
 }
 
 export type User = {
-    Id: string ;
-    Email: string;
-    DisplayName: string;
-    ImageUrl: string;
-    TotalSpent: number;
+    id: string ;
+    email: string;
+    displayName: string;
+    imageUrl: string;
+    totalSpent: number;
 }
     

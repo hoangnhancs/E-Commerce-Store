@@ -99,7 +99,7 @@ public class AccountController(SignInManager<User> signInManager) : BaseApiContr
         var result = await signInManager.PasswordSignInAsync(
             loginDto.Email,
             loginDto.Password,
-            isPersistent: false,  // Set to true if you want "remember me" functionality
+            isPersistent: true,  // Set to true if you want "remember me" functionality
             lockoutOnFailure: false);  // Set to true to enable account lockout on failed attempts
 
         if (!result.Succeeded) return Unauthorized();
@@ -107,8 +107,14 @@ public class AccountController(SignInManager<User> signInManager) : BaseApiContr
         var user = await signInManager.UserManager.FindByEmailAsync(loginDto.Email);
 
         if (user == null) return Unauthorized();
-        return Ok("Login successfully");
-    }
-
-    
+        return Ok(new UserDto
+        {
+            DisplayName = user.DisplayName ?? string.Empty,
+            Email = user.Email ?? string.Empty,
+            Id = user.Id,
+            ImageUrl = user.ImageUrl ?? string.Empty,
+            TotalSpent = user.TotalSpent,
+            // user.Photos,
+        });
+    }    
 }

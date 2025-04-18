@@ -3,13 +3,23 @@ import { baseQueryWithErrorHandling } from "../../app/api/baseApi";
 import { User } from "../../lib/types";
 
 export const userApi = createApi({
-    reducerPath: "userApi",
-    baseQuery: baseQueryWithErrorHandling,
-    endpoints: (builder) => ({
-        getCurrentUser: builder.query<User, void>({
-            query: () => ({url: "/account/user-info", method: "GET"}),
-        }),
+  reducerPath: "userApi",
+  baseQuery: baseQueryWithErrorHandling,
+  tagTypes: ["User"], // Define the tag type here
+  endpoints: (builder) => ({
+    getCurrentUser: builder.query<User, void>({
+      query: () => ({ url: "/account/user-info", method: "GET" }),
+      providesTags: ["User"],
     }),
-})
+    login: builder.mutation<User, { email: string; password: string }>({
+      query: ({ email, password }) => ({
+        url: "/account/login",
+        method: "POST",
+        body: { email, password },
+      }),
+      invalidatesTags: ["User"],
+    }),
+  }),
+});
 
-export const {useGetCurrentUserQuery} = userApi
+export const {useGetCurrentUserQuery, useLoginMutation} = userApi

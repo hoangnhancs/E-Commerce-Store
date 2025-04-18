@@ -26,7 +26,7 @@ export default function ProductDetails() {
   const [openLoginPrompt, setOpenLoginPrompt] = useState(false);
   const {data} = useGetCurrentUserQuery();
   const handleAddToCart = () => {
-    if (!data?.Id) {
+    if (!data?.id) {
         setOpenLoginPrompt(true); 
     }
   }

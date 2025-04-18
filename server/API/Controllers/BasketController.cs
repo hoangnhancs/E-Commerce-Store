@@ -26,12 +26,21 @@ public class BasketController() : BaseApiController
     [HttpPost("mybasket/items")]
     public async Task<IActionResult> AddItemToBasket(AddItemDto addItemDto)
     {
+        var identity = User.Identity;
+        var isAuthenticated = identity?.IsAuthenticated ?? false;
+        var claims = User.Claims.Select(c => new { c.Type, c.Value }).ToList();
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (string.IsNullOrEmpty(userId)) 
         {
-            return Unauthorized("User not authenticated");
+            return Unauthorized(new
+            {
+                message = "User not authenticated",
+                isAuthenticated,
+                claims,
+                identityName = identity?.Name
+            });
         }
 
         var command = new AddItemToBasketCommand

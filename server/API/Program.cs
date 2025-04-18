@@ -42,6 +42,17 @@ builder.Services.AddIdentityApiEndpoints<User>(opt =>
  .AddRoles<IdentityRole>()
  .AddEntityFrameworkStores<StoreContext>();
 
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.SameSite = SameSiteMode.None;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+});
+builder.Services.Configure<CookiePolicyOptions>(options =>
+{
+    options.MinimumSameSitePolicy = SameSiteMode.None;
+    options.Secure = CookieSecurePolicy.Always;
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -49,7 +60,7 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
-
+app.UseCookiePolicy();
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
@@ -60,9 +71,9 @@ app.UseMiddleware<ExceptionMiddleware>();
 app.UseCors(options =>
 {
     options
-        .AllowAnyOrigin()
         .AllowAnyMethod()
         .AllowAnyHeader()
+        .AllowCredentials()
         .WithOrigins("https://localhost:3000");
 });
 
