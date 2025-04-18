@@ -9,7 +9,7 @@ public class BasketRepository(StoreContext context) : IBasketRepository
 {
     private readonly StoreContext _context = context;
 
-    public async Task AddItemToBasketAsync(string userId, Product product, int quantity, CancellationToken cancellationToken)
+    public async Task<Basket> AddItemToBasketAsync(string userId, Product product, int quantity, CancellationToken cancellationToken)
     {
         var basket = await GetBasketByUserIdAsync(userId, cancellationToken);
 
@@ -20,6 +20,7 @@ public class BasketRepository(StoreContext context) : IBasketRepository
         }
 
         basket.AddItem(product, quantity);
+        return basket;
     }
 
     public Task CreateBasketAsync(string userId, CancellationToken cancellationToken)
@@ -37,11 +38,11 @@ public class BasketRepository(StoreContext context) : IBasketRepository
             .FirstOrDefaultAsync(b => b.UserId == userId, cancellationToken);
     }
 
-    public async Task RemoveItemFromBasketAsync(string userId, string productId, int quantity, CancellationToken cancellationToken)
+    public async Task<Basket> RemoveItemFromBasketAsync(string userId, string productId, int quantity, CancellationToken cancellationToken)
     {
-        var basket = await GetBasketByUserIdAsync(userId, cancellationToken);
-        if (basket == null) return;
+        var basket = await GetBasketByUserIdAsync(userId, cancellationToken) ?? throw new InvalidOperationException("Basket not found");
         basket.RemoveItem(productId, quantity);
+        return basket;
     }
 
     public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken)

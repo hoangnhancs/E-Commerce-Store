@@ -1,11 +1,14 @@
 using System;
 using Application.Core;
+using Application.DTOs;
+using Application.Mappers;
+using Domain.Entities;
 using Domain.Interfaces;
 using MediatR;
 
 namespace Application.Command.Baskets;
 
-public class RemoveItemFromBasketHandler : IRequestHandler<RemoveItemFromBasketCommand, Result<Unit>>
+public class RemoveItemFromBasketHandler : IRequestHandler<RemoveItemFromBasketCommand, Result<BasketDto>>
 {
     private readonly IBasketRepository _basketRepository;
     private readonly IProductRepository _productRepository;
@@ -15,24 +18,24 @@ public class RemoveItemFromBasketHandler : IRequestHandler<RemoveItemFromBasketC
         _productRepository = productRepository;
     }
 
-    public async Task<Result<Unit>> Handle(RemoveItemFromBasketCommand request, CancellationToken cancellationToken)
+    public async Task<Result<BasketDto>> Handle(RemoveItemFromBasketCommand request, CancellationToken cancellationToken)
     {
 
         if (string.IsNullOrEmpty(request.UserId))
         {
-            return Result<Unit>.Failure("User ID cannot be null or empty", 400);
+            return Result<BasketDto>.Failure("User ID cannot be null or empty", 400);
         }
 
         var product = await _productRepository.GetProductByIdAsync(request.ProductId, cancellationToken);
 
-        if (product == null) return Result<Unit>.Failure("Product not found", 404);
+        if (product == null) return Result<BasketDto>.Failure("Product not found", 404);
 
-        await _basketRepository.RemoveItemFromBasketAsync(request.UserId, request.ProductId, request.Quantity, cancellationToken);
+        var newBasket = await _basketRepository.RemoveItemFromBasketAsync(request.UserId, request.ProductId, request.Quantity, cancellationToken);
 
         var result = await _basketRepository.SaveChangesAsync(cancellationToken);
 
-        if (!result) return Result<Unit>.Failure("Problem saving changes", 400);
+        if (!result) return Result<BasketDto>.Failure("Don't have any changes", 400);
 
-        return Result<Unit>.Success(Unit.Value);
+        return Result<BasketDto>.Success(BasketMapper.MapToDto(newBasket));
     }
 }

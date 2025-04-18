@@ -1,7 +1,7 @@
 import { StoreMallDirectory, DarkMode, LightMode, ShoppingCart } from "@mui/icons-material";
 import { AppBar, Badge, Box, CircularProgress, Container, Divider, IconButton, LinearProgress, List, Toolbar, Typography } from "@mui/material";
 import MenuItemLink from "../components/MenuItemLink";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { Menu, Close } from "@mui/icons-material";
 import { useMediaQuery, useTheme, Drawer } from "@mui/material";
 import { useState } from "react";
@@ -109,7 +109,7 @@ export default function NavBar() {
                 <IconButton onClick={() => dispatch(toggleDarkMode())}>
                   {!isDarkMode ? <LightMode sx={{color: 'yellow'}} /> : <DarkMode />}
                 </IconButton>
-                <IconButton color="inherit">
+                <IconButton component={Link} to={'/basket'} color="inherit">
                   <Badge badgeContent={4} color="secondary">
                     <ShoppingCart />
                   </Badge>
@@ -131,7 +131,7 @@ export default function NavBar() {
               <IconButton onClick={() => dispatch(toggleDarkMode())} sx={{ mr: 1 }}>
                 {!isDarkMode ? <LightMode sx={{color: 'yellow'}} /> : <DarkMode />}
               </IconButton>
-              <IconButton color="inherit" sx={{ mr: 1 }}>
+              <IconButton component={Link} to={'/basket'} color="inherit" sx={{ mr: 1 }}>
                 <Badge badgeContent={4} color="secondary">
                   <ShoppingCart />
                 </Badge>

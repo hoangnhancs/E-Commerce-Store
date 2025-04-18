@@ -1,6 +1,9 @@
 import { useParams } from "react-router-dom";
 import { Box, Button, Divider, Grid, Table, TableBody, TableCell, TableContainer, TableRow, TextField, Typography } from "@mui/material";
 import { useFetchProductByIdQuery } from "./productApi";
+import { useState } from "react";
+import LoginPromptDialog from "../../components/LoginPromptDialog";
+import { useGetCurrentUserQuery } from "../user/userApi";
 // import { styled } from '@mui/material/styles';
 
 
@@ -19,8 +22,14 @@ interface ColorOptions {
 
 export default function ProductDetails() {
   const { id } = useParams();
-
   const {data: product, isLoading: isLoading} = useFetchProductByIdQuery(id ?? '')
+  const [openLoginPrompt, setOpenLoginPrompt] = useState(false);
+  const {data} = useGetCurrentUserQuery();
+  const handleAddToCart = () => {
+    if (!data?.Id) {
+        setOpenLoginPrompt(true); 
+    }
+  }
 
   const dungluong: StorageOptions = {
   '1TB': 1000,
@@ -67,49 +76,47 @@ export default function ProductDetails() {
             <Grid container spacing={{ xs: 1, md: 1.5 }} columns={{ xs: 4, sm: 8, md: 12 }}>
               {Object.entries(dungluong).map(([label, value]) => (
                 <Grid sx={{borderRadius: '10px'}} key={label} size={{ xs: 2, sm: 4, md: 4 }}>
-                  
-                    <Box
+                  <Box
+                    sx={{
+                      position: 'relative',
+                      borderRadius: '10px',
+                      
+                    }}
+                  >
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      size="large"
+                      fullWidth
                       sx={{
-                        position: 'relative',
-                        borderRadius: '10px',
-                        
+                        borderRadius: '10px', 
+                        borderColor: isSelected ? '#d70018' : 'black',
+                        color: 'black'
                       }}
                     >
-                      <Button
-                        variant="outlined"
-                        color="primary"
-                        size="large"
-                        fullWidth
+                      {label} - {value} GB
+                    </Button>
+                    {isSelected && (
+                      <Box
                         sx={{
-                          borderRadius: '10px', 
-                          borderColor: isSelected ? '#d70018' : 'black',
-                          color: 'black'
+                          position: 'absolute',
+                          top: 0,
+                          right: 0,
+                          backgroundColor: '#d70018',
+                          color: '#fff',
+                          fontSize: '10px',
+                          height: '15px',
+                          width: '20px',
+                          borderRadius: '0 10px 0 10px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',   
                         }}
                       >
-                        {label} - {value} GB
-                      </Button>
-                      {isSelected && (
-                        <Box
-                          sx={{
-                            position: 'absolute',
-                            top: 0,
-                            right: 0,
-                            backgroundColor: '#d70018',
-                            color: '#fff',
-                            fontSize: '10px',
-                            height: '15px',
-                            width: '20px',
-                            borderRadius: '0 10px 0 10px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',   
-                          }}
-                        >
-                          ✓
-                        </Box>
-                      )} 
-                    </Box>
-                  
+                        ✓
+                      </Box>
+                    )} 
+                  </Box> 
                 </Grid>
               ))}
             </Grid>
@@ -118,88 +125,88 @@ export default function ProductDetails() {
             <Grid container spacing={{ xs: 1, md: 1.5 }} columns={{ xs: 4, sm: 8, md: 12 }}>
               {Object.entries(mausac).map(([label, value]) => (
                 <Grid sx={{borderRadius: '10px'}} key={label} size={{ xs: 2, sm: 4, md: 4 }}> 
-                    <Box
+                  <Box
+                    sx={{
+                      position: 'relative',
+                      borderRadius: '10px',    
+                    }}
+                  >
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      size="large"
+                      fullWidth
                       sx={{
-                        position: 'relative',
-                        borderRadius: '10px',    
+                        borderRadius: '10px', 
+                        borderColor: isSelected ? '#d70018' : 'black',
+                        color: 'black'
                       }}
                     >
-                      <Button
-                        variant="outlined"
-                        color="primary"
-                        size="large"
-                        fullWidth
+                      <Box 
                         sx={{
-                          borderRadius: '10px', 
-                          borderColor: isSelected ? '#d70018' : 'black',
-                          color: 'black'
+                          display: 'flex', 
+                          alignItems: 'center',
+                          width: '100%',
+                          gap: 1,
+                          maxHeight: 30,
                         }}
                       >
-                        <Box 
-                          sx={{
-                            display: 'flex', 
-                            alignItems: 'center',
-                            width: '100%',
-                            gap: 1,
-                            maxHeight: 30,
-                          }}
+                        <Box
+                          component={'img'}
+                          src={product.imageUrl}
+                          sx={{ 
+                            height: 35,
+                            objectFit: 'cover',
+                            borderRadius: '8px',
+                            ml: -1.5,
+                          }}      
                         >
-                          <Box
-                            component={'img'}
-                            src={product.imageUrl}
-                            sx={{ 
-                              height: 35,
-                              objectFit: 'cover',
-                              borderRadius: '8px',
-                              ml: -1.5,
-                            }}      
-                          >
-                          </Box>  
-                          <Box
-                            sx={{
-                              textAlign: 'left',
-                              flex: 1,
-                              ml:1,
-                            }}
-                          >
-                            <Box
-                              sx={{
-                                fontSize: '12px',                                                               
-                              }}
-                            >
-                              {label}
-                            </Box>
-                            <Box
-                              sx={{
-                                fontSize: '12px',                                
-                              }}
-                            >
-                              {value}
-                            </Box>          
-                          </Box>  
-                        </Box>
-                      </Button>
-                      {isSelected && (
+                        </Box>  
                         <Box
                           sx={{
-                            position: 'absolute',
-                            top: 0,
-                            right: 0,
-                            backgroundColor: '#d70018',
-                            color: '#fff',
-                            fontSize: '10px',
-                            height: '15px',
-                            width: '20px',
-                            borderRadius: '0 10px 0 10px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',   
+                            textAlign: 'left',
+                            flex: 1,
+                            ml:1,
                           }}
                         >
-                          ✓
-                        </Box>
-                      )} 
-                    </Box>                  
+                          <Box
+                            sx={{
+                              fontSize: '12px',                                                               
+                            }}
+                          >
+                            {label}
+                          </Box>
+                          <Box
+                            sx={{
+                              fontSize: '12px',                                
+                            }}
+                          >
+                            {value}
+                          </Box>          
+                        </Box>  
+                      </Box>
+                    </Button>
+                    {isSelected && (
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          top: 0,
+                          right: 0,
+                          backgroundColor: '#d70018',
+                          color: '#fff',
+                          fontSize: '10px',
+                          height: '15px',
+                          width: '20px',
+                          borderRadius: '0 10px 0 10px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',   
+                        }}
+                      >
+                        ✓
+                      </Box>
+                    )} 
+                  </Box>                  
                 </Grid>
               ))}
             </Grid>
@@ -236,6 +243,7 @@ export default function ProductDetails() {
                 variant="contained"
                 fullWidth
                 sx={{ mt: 2 }}
+                onClick={handleAddToCart} // Call the function to handle adding to cart
               >
                 Add to Basket
               </Button>
@@ -243,6 +251,7 @@ export default function ProductDetails() {
           </Grid>
         </Grid>
       </Box>
+      <LoginPromptDialog open={openLoginPrompt} onClose={() => setOpenLoginPrompt(false)} />
     </Grid>
   )
 }

@@ -57,13 +57,13 @@ public class AccountController(SignInManager<User> signInManager) : BaseApiContr
 
         var roles = await signInManager.UserManager.GetRolesAsync(user);
 
-        return Ok(new
+        return Ok(new UserDto
         {
-            user.DisplayName,
-            user.Email,
-            user.Id,
-            user.ImageUrl,
-            roles,
+            DisplayName = user.DisplayName ?? string.Empty,
+            Email = user.Email ?? string.Empty,
+            Id = user.Id,
+            ImageUrl = user.ImageUrl ?? string.Empty,
+            TotalSpent = user.TotalSpent,
             // user.Photos,
         });
     }
@@ -109,4 +109,6 @@ public class AccountController(SignInManager<User> signInManager) : BaseApiContr
         if (user == null) return Unauthorized();
         return Ok("Login successfully");
     }
+
+    
 }

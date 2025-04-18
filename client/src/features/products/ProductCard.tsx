@@ -2,13 +2,26 @@ import { Box, Button, Card, CardActions, CardContent, CardMedia, Typography } fr
 import { Product } from "../../lib/types";
 import { Link } from "react-router-dom";
 import discount from '../../assets/discount.png';
-
+import { useGetCurrentUserQuery } from "../user/userApi";
+import { useState } from "react";
+import LoginPromptDialog from "../../components/LoginPromptDialog";
 
 type Props = {
     product: Product
 }
 
 export default function ProductCard({product}: Props) {
+
+    const [openLoginPrompt, setOpenLoginPrompt] = useState(false);
+    const {data} = useGetCurrentUserQuery();
+
+    const handleAddToCart = () => {
+        if (!data?.Id) {
+            setOpenLoginPrompt(true); // Hiển thị hộp thoại yêu cầu đăng nhập
+        }
+        // Thực hiện thêm sản phẩm vào giỏ hàng ở đây
+    }
+
   return (
     <Card
         elevation={3}    
@@ -119,9 +132,11 @@ export default function ProductCard({product}: Props) {
                 paddingTop: 0,
             }}
         >
-            <Button >Add to cart</Button>
+            <Button onClick={handleAddToCart} >Add to cart</Button>
             <Button component={Link} to={`/products/${product.id}`}>View</Button>
         </CardActions>
+        <LoginPromptDialog 
+        open={openLoginPrompt} onClose={() => setOpenLoginPrompt(false)} />
     </Card>
   )
 }
