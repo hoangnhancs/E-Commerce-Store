@@ -5,9 +5,11 @@ import { Basket } from "../../lib/types";
 export const basketApi = createApi({
     reducerPath: "basketApi",
     baseQuery: baseQueryWithErrorHandling,
+    tagTypes: ["Basket"],
     endpoints: (builder) => ({
         fetchBasket: builder.query<Basket, void>({
             query: () => ({url: "/basket/mybasket", method: "GET"}),
+            providesTags: ["Basket"],
         }),
         addBasketItem: builder.mutation<Basket, {productId: string, quantity: number}>({
             query: ({productId, quantity}) => ({
@@ -18,15 +20,14 @@ export const basketApi = createApi({
                     quantity
                 }
             }),
+            invalidatesTags: ["Basket"],
         }),
         removeBasketItem: builder.mutation<Basket, {productId: string, quantity: number}>({
             query: ({productId, quantity}) => ({
-                url: `/basket/mybasket/items/${productId}`,
+                url: `/basket/mybasket/items/${productId}?quantity=${quantity}`,
                 method: "DELETE",
-                body: {
-                    quantity
-                }
             }),
+            invalidatesTags: ["Basket"],
         }),
     }),
 })

@@ -5,7 +5,7 @@ import { User } from "../../lib/types";
 export const userApi = createApi({
   reducerPath: "userApi",
   baseQuery: baseQueryWithErrorHandling,
-  tagTypes: ["User"], // Define the tag type here
+  tagTypes: ["User", "Basket"], 
   endpoints: (builder) => ({
     getCurrentUser: builder.query<User, void>({
       query: () => ({ url: "/account/user-info", method: "GET" }),
@@ -17,7 +17,7 @@ export const userApi = createApi({
         method: "POST",
         body: { email, password },
       }),
-      invalidatesTags: ["User"],
+      invalidatesTags: ["User", "Basket"],
     }),
   }),
 });

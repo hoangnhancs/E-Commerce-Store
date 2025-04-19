@@ -7,6 +7,8 @@ import { useMediaQuery, useTheme, Drawer } from "@mui/material";
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../hooks";
 import { toggleDarkMode } from "./uiSlice";
+import { useFetchBasketQuery } from "../features/basket/basketApi";
+import { useGetCurrentUserQuery } from "../features/user/userApi";
 
 
 
@@ -29,6 +31,10 @@ export default function NavBar() {
   const {isLoading, isDarkMode} = useAppSelector(state => state.ui)
   const dispatch = useAppDispatch()
   const theme = useTheme();
+  const {data: user} = useGetCurrentUserQuery();
+  const {data: basket} = useFetchBasketQuery(undefined, {
+    skip: !user
+  })
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -110,7 +116,7 @@ export default function NavBar() {
                   {!isDarkMode ? <LightMode sx={{color: 'yellow'}} /> : <DarkMode />}
                 </IconButton>
                 <IconButton component={Link} to={'/basket'} color="inherit">
-                  <Badge badgeContent={4} color="secondary">
+                  <Badge badgeContent={basket?.items.length} color="secondary">
                     <ShoppingCart />
                   </Badge>
                 </IconButton>
@@ -132,7 +138,7 @@ export default function NavBar() {
                 {!isDarkMode ? <LightMode sx={{color: 'yellow'}} /> : <DarkMode />}
               </IconButton>
               <IconButton component={Link} to={'/basket'} color="inherit" sx={{ mr: 1 }}>
-                <Badge badgeContent={4} color="secondary">
+                <Badge badgeContent={basket?.items.length} color="secondary">
                   <ShoppingCart />
                 </Badge>
               </IconButton>

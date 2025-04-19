@@ -5,6 +5,8 @@ import discount from '../../assets/discount.png';
 import { useGetCurrentUserQuery } from "../user/userApi";
 import { useState } from "react";
 import LoginPromptDialog from "../../components/LoginPromptDialog";
+import { useAddBasketItemMutation } from "../basket/basketApi";
+import { toast } from "react-toastify";
 
 type Props = {
     product: Product
@@ -14,11 +16,26 @@ export default function ProductCard({product}: Props) {
 
     const [openLoginPrompt, setOpenLoginPrompt] = useState(false);
     const {data} = useGetCurrentUserQuery();
+    const [addBasketItem] = useAddBasketItemMutation()
 
     const handleAddToCart = () => {
         if (!data?.id) {
             setOpenLoginPrompt(true); 
+            return;
         }
+
+        addBasketItem({
+            productId: product.id,
+            quantity: 1
+        })
+        .unwrap()
+        .then(() => {
+            toast.success(`Added ${product.name} to your cart`);
+        })
+        .catch(error => {
+            console.error('Error adding item to cart:', error);
+            toast.error('Could not add item to cart. Please try again.');
+        });
     }
 
   return (

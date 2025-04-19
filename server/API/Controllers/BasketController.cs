@@ -54,7 +54,7 @@ public class BasketController() : BaseApiController
     }
 
     [HttpDelete("mybasket/items/{productId}")]
-    public async Task<IActionResult> RemoveItemFromBsket(string productId, [FromQuery]int quantity = 1)
+    public async Task<IActionResult> RemoveItemFromBsket(string productId, [FromQuery]int quantity)
     {
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
