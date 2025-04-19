@@ -1,7 +1,7 @@
 import { StoreMallDirectory, DarkMode, LightMode, ShoppingCart } from "@mui/icons-material";
 import { AppBar, Badge, Box, CircularProgress, Container, Divider, IconButton, LinearProgress, List, Toolbar, Typography } from "@mui/material";
 import MenuItemLink from "../components/MenuItemLink";
-import { Link, NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { Menu, Close } from "@mui/icons-material";
 import { useMediaQuery, useTheme, Drawer } from "@mui/material";
 import { useState } from "react";
@@ -9,6 +9,8 @@ import { useAppDispatch, useAppSelector } from "../hooks";
 import { toggleDarkMode } from "./uiSlice";
 import { useFetchBasketQuery } from "../features/basket/basketApi";
 import { useGetCurrentUserQuery } from "../features/user/userApi";
+import UserMenu from "../features/user/UserMenu";
+import LoginPromptDialog from "../components/LoginPromptDialog";
 
 
 
@@ -31,12 +33,24 @@ export default function NavBar() {
   const {isLoading, isDarkMode} = useAppSelector(state => state.ui)
   const dispatch = useAppDispatch()
   const theme = useTheme();
-  const {data: user} = useGetCurrentUserQuery();
+  const {data: currentUser} = useGetCurrentUserQuery();
   const {data: basket} = useFetchBasketQuery(undefined, {
-    skip: !user
+    skip: !currentUser
   })
+  console.log('Current user:', currentUser);
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [openLoginPrompt, setOpenLoginPrompt] = useState(false);
+  const navigate = useNavigate()
+
+  const handleClickShoppingCart = () => {
+    if (!currentUser) {
+      setOpenLoginPrompt(true);
+    }
+    else {
+      navigate('/basket')
+    }
+  }
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -47,6 +61,9 @@ export default function NavBar() {
       <Box sx={{ display: 'flex', alignItems: 'center', p: 2 }}>
         <StoreMallDirectory sx={{ fontSize: '2rem' }} />
         <Typography variant="h6" sx={{ ml: 1 }}>RE-STORE</Typography>
+        <IconButton onClick={() => dispatch(toggleDarkMode())}>
+          {!isDarkMode ? <LightMode sx={{color: 'yellow'}} /> : <DarkMode />}
+        </IconButton>
       </Box>
       <List>
         {midLinks.map(({title, path}) => (
@@ -59,21 +76,23 @@ export default function NavBar() {
         ))}
       </List>
       <Divider />
-      <List>
-        {rightLinks.map(({title, path}) => (
-          <MenuItemLink 
-            key={path} 
-            to={path}
-          >
-            {title.toUpperCase()}
-          </MenuItemLink>
-        ))}
-      </List>
+      {currentUser ? (<UserMenu />) : (
+        <List>
+          {rightLinks.map(({title, path}) => (
+            <MenuItemLink 
+              key={path} 
+              to={path}
+            >
+              {title.toUpperCase()}
+            </MenuItemLink>
+          ))}
+        </List>
+      )}
+      
     </Box>
   );
 
   return (
-    
     <AppBar position="fixed" >
       <Container maxWidth='xl'>
         <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', height: '80px !important' }}>
@@ -93,17 +112,20 @@ export default function NavBar() {
             >
               RE-STORE
             </Typography>
+            <IconButton sx={{ml: 2}} onClick={() => dispatch(toggleDarkMode())}>
+              {!isDarkMode ? <LightMode sx={{color: 'yellow'}} /> : <DarkMode />}
+            </IconButton>
             <Box>
               {isLoading && (
-              <CircularProgress />
-            )}
+                <CircularProgress />
+              )}
             </Box>
           </Box>
 
           {/* Desktop Menu */}
           {!isMobile && (
             <>
-              <List sx={{ display: 'flex', gap: 2 }}>
+              <List sx={{ display: 'flex', gap: 1 }}>
                 {midLinks.map(({title, path}) => (
                   <MenuItemLink key={path} to={path}>
                     {title.toUpperCase()}
@@ -111,23 +133,27 @@ export default function NavBar() {
                 ))}
               </List>
 
-              <Box display="flex" alignItems="center">
-                <IconButton onClick={() => dispatch(toggleDarkMode())}>
-                  {!isDarkMode ? <LightMode sx={{color: 'yellow'}} /> : <DarkMode />}
-                </IconButton>
-                <IconButton component={Link} to={'/basket'} color="inherit">
-                  <Badge badgeContent={basket?.items.length} color="secondary">
-                    <ShoppingCart />
+              <Box display="flex" alignItems="center" sx={{ minWidth: 300, justifyContent: 'flex-end' }}>
+                <IconButton onClick={handleClickShoppingCart} color="inherit" sx={{ mr: 3 }}>
+                  <Badge badgeContent={currentUser ? basket?.items.length || 0 : 0} color="secondary">
+                    <ShoppingCart sx={{borderRadius: '25%'}} />
                   </Badge>
                 </IconButton>
-                <List sx={{ display: 'flex', gap: 2, ml: 2 }}>
-                  {rightLinks.map(({title, path}) => (
-                    <MenuItemLink key={path} to={path}>
-                      {title.toUpperCase()}
-                    </MenuItemLink>
-                  ))}
-                </List>
+                <Box sx={{ width: 220, display: 'flex', justifyContent: 'flex-start' }}>
+                  {currentUser ? (
+                    <UserMenu />
+                  ) : (
+                    <List sx={{ display: 'flex', gap: 1 }}>
+                      {rightLinks.map(({title, path}) => (
+                        <MenuItemLink key={path} to={path}>
+                          {title.toUpperCase()}
+                        </MenuItemLink>
+                      ))}
+                    </List>
+                  )}
+                </Box>  
               </Box>
+              <LoginPromptDialog open={openLoginPrompt} onClose={() => setOpenLoginPrompt(false)} />
             </>
           )}
 
@@ -137,8 +163,8 @@ export default function NavBar() {
               <IconButton onClick={() => dispatch(toggleDarkMode())} sx={{ mr: 1 }}>
                 {!isDarkMode ? <LightMode sx={{color: 'yellow'}} /> : <DarkMode />}
               </IconButton>
-              <IconButton component={Link} to={'/basket'} color="inherit" sx={{ mr: 1 }}>
-                <Badge badgeContent={basket?.items.length} color="secondary">
+              <IconButton onClick={handleClickShoppingCart} color="inherit" sx={{ mr: 1 }}>
+                <Badge badgeContent={currentUser ? basket?.items.length || 0 : 0} color="secondary">
                   <ShoppingCart />
                 </Badge>
               </IconButton>
